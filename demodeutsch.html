@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZakiFlow KI-Automatisierungs-Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 { margin: 0; font-size: 24px; }
+        .chat-window {
+            padding: 20px;
+            height: 500px;
+            overflow-y: auto;
+            border-bottom: 1px solid #ddd;
+            background-color: #fafafa;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 80%;
+            line-height: 1.4;
+        }
+        .ki-message {
+            background-color: #e3f2fd;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+        }
+        .user-message {
+            background-color: #c8e6c9;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+        .input-area {
+            display: flex;
+            padding: 15px;
+            background-color: #fff;
+        }
+        .input-area input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 25px 0 0 25px;
+            outline: none;
+        }
+        .input-area button {
+            padding: 12px 25px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 0 25px 25px 0;
+            cursor: pointer;
+        }
+        .call-simulation {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+            background-color: #fff9e6;
+        }
+        .call-animation {
+            width: 120px;
+            height: 120px;
+            background-color: #4caf50;
+            border-radius: 50%;
+            margin: 20px auto;
+            animation: pulse 1.5s infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 48px;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(76,175,80,0.7); }
+            70% { transform: scale(1.15); box-shadow: 0 0 0 20px rgba(76,175,80,0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(76,175,80,0); }
+        }
+        .whatsapp-simulation {
+            display: none;
+            padding: 20px;
+            background: linear-gradient(135deg, #e5f6e5, #d0f0d0);
+        }
+        .whatsapp-header {
+            text-align: center;
+            color: #075e54;
+            margin-bottom: 20px;
+        }
+        .whatsapp-message {
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .property {
+            margin: 15px 0;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .property:last-child { border-bottom: none; }
+        .whatsapp-button {
+            display: block;
+            margin: 25px auto 10px;
+            padding: 14px 30px;
+            background-color: #25D366;
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            text-align: center;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(37,211,102,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ZakiFlow KI-Automatisierungs-Demo</h1>
+            <p>Live-Simulation: KI-Chat → KI-Anruf → automatisches WhatsApp-Angebot</p>
+        </div>
+
+        <div class="chat-window" id="chatWindow">
+            <div class="message ki-message">
+                Willkommen bei ZakiFlow! Wir sind eine KI-Automatisierungs-Agentur.<br>
+                Wie kann ich Ihnen behilflich sein?
+            </div>
+
+            <!-- Kunde schreibt automatisch -->
+            <div class="message user-message" id="autoUserMessage" style="display:none;">
+                Ich suche eine Wohnung in Worms für mich und meine Freundin zum Kauf.
+            </div>
+        </div>
+
+        <div class="input-area" id="inputArea">
+            <input type="text" id="userInput" placeholder="Ihre Nachricht..." autocomplete="off">
+            <button onclick="sendMessage()">Senden</button>
+        </div>
+
+        <div class="call-simulation" id="callSimulation">
+            <h3>KI ruft automatisch an...</h3>
+            <div class="call-animation">📞</div>
+            <p style="font-size:18px; color:#444;">Telefonat wird abgespielt</p>
+            <audio id="callAudio" src="https://github.com/christianschroeder2210-star/deutsch/raw/main/elevenlabs.deutsch" onended="endCall()"></audio>
+        </div>
+
+        <div class="whatsapp-simulation" id="whatsappSimulation">
+            <div class="whatsapp-header">
+                <h2>✨ Automatische WhatsApp-Antwort</h2>
+                <p>Basierend auf Budget & Wunschlage (Worms)</p>
+            </div>
+            <div class="whatsapp-message">
+                <p>Hallo! Vielen Dank für das Gespräch 👋</p>
+                <p>Hier sind 3 perfekt passende Immobilien in Worms für Sie und Ihre Freundin:</p>
+                
+                <div class="property">
+                    <strong>1. Moderne 3-Zimmer-Wohnung – Worms Innenstadt</strong><br>
+                    Kaufpreis: <strong><span id="prop1Price"></span> €</strong><br>
+                    82 m² · Balkon · EBK · 2. OG mit Aufzug
+                </div>
+                <div class="property">
+                    <strong>2. Helle DG-Wohnung mit Dachterrasse – Worms-Herrenhausen</strong><br>
+                    Kaufpreis: <strong><span id="prop2Price"></span> €</strong><br>
+                    95 m² · 25 m² Dachterrasse · sehr gepflegt
+                </div>
+                <div class="property">
+                    <strong>3. Neubau-Penthouse (Erstbezug) – Worms Rheinufer</strong><br>
+                    Kaufpreis: <strong><span id="prop3Price"></span> €</strong><br>
+                    110 m² · Fußbodenheizung · Tiefgarage inkl.
+                </div>
+
+                <p>Welches Objekt interessiert Sie am meisten? Gerne sende ich Ihnen Exposés und vereinbare Besichtigungstermine!</p>
+            </div>
+            <a href="https://wa.me/34651492562" class="whatsapp-button" target="_blank">
+                ➜ Jetzt auf WhatsApp antworten
+            </a>
+        </div>
+    </div>
+
+    <script>
+        let budget = 0;
+        let step = 0;
+
+        // Automatische erste Kundennachricht nach 1,5 Sekunden
+        setTimeout(() => {
+            document.getElementById('autoUserMessage').style.display = 'block';
+            document.getElementById('chatWindow').scrollTop = document.getElementById('chatWindow').scrollHeight;
+
+            // KI antwortet direkt danach
+            setTimeout(() => {
+                addKiMessage("Super, eine Wohnung zum Kauf in Worms! 🎉<br>Was ist Ihr maximales Budget in €?");
+                document.getElementById('userInput').focus();
+            }, 1200);
+        }, 1500);
+
+        function addKiMessage(text) {
+            const chatWindow = document.getElementById('chatWindow');
+            const msg = document.createElement('div');
+            msg.className = 'message ki-message';
+            msg.innerHTML = text;
+            chatWindow.appendChild(msg);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            // User message
+            const chatWindow = document.getElementById('chatWindow');
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message user-message';
+            userMsg.textContent = text;
+            chatWindow.appendChild(userMsg);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+
+            input.value = '';
+
+            if (step === 0) {
+                budget = parseInt(text.replace(/[^0-9]/g, '')) || 350000;
+                addKiMessage(`Perfekt! Budget: ${budget.toLocaleString()} €.<br><br>Ich würde Sie jetzt kurz anrufen, um noch 2–3 Details zu klären. Dauert nur 45 Sekunden – sind Sie bereit?`);
+
+                // Buttons statt Eingabefeld
+                document.getElementById('inputArea').innerHTML = `
+                    <button onclick="startCall()" style="margin:0 auto; display:block; padding:12px 40px; background:#4caf50; color:white; border:none; border-radius:25px; font-size:16px; cursor:pointer;">Ja, jetzt anrufen</button>
+                `;
+                step = 1;
+            }
+        }
+
+        function startCall() {
+            document.getElementById('inputArea').style.display = 'none';
+            document.getElementById('callSimulation').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('callAudio').play();
+            }, 800);
+        }
+
+        function endCall() {
+            document.getElementById('callSimulation').style.display = 'none';
+            document.getElementById('whatsappSimulation').style.display = 'block';
+
+            // Preise leicht unter/auf Budget
+            document.getElementById('prop1Price').textContent = Math.round(budget * 0.88).toLocaleString();
+            document.getElementById('prop2Price').textContent = Math.round(budget * 0.96).toLocaleString();
+            document.getElementById('prop3Price').textContent = budget.toLocaleString();
+        }
+    </script>
+</body>
+</html>
